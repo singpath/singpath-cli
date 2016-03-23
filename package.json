@@ -1,5 +1,5 @@
 {
-  "name": "singpath-cli",
+  "name": "@singpath/cli",
   "version": "0.0.0",
   "description": "CLI utils for Singpath project.",
   "main": "index.js",
