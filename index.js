@@ -4,10 +4,17 @@ const argparse = require('argparse');
 const camelCase = require('lodash.camelcase');
 const fs = require('fs');
 
+const chainKey = Symbol('chain');
+
 class Settings {
 
   constructor(defaults) {
     Object.assign(this, defaults);
+    this[chainKey] = Promise.resolve(this);
+  }
+
+  done() {
+    return this[chainKey];
   }
 
   /**
@@ -22,13 +29,13 @@ class Settings {
    *
    * @param  {string}  prefix
    * @param  {object}  opts
-   * @return {promise}
+   * @return {this}
    */
   env(prefix, opts) {
     prefix = prefix || '';
     opts = opts || {};
 
-    return new Promise(resolve => {
+    this[chainKey] = this[chainKey].then(() => {
       const env = opts.env || process.env;
       const prefixLength = prefix.length;
 
@@ -41,8 +48,10 @@ class Settings {
         entrie[1]
       ]);
 
-      resolve(this._update(vars, opts));
+      return this._update(vars, opts);
     });
+
+    return this;
   }
 
   /**
@@ -58,12 +67,16 @@ class Settings {
    *
    * @param  {string} path
    * @param  {object} opts
-   * @return {promise}
+   * @return {this}
    */
   json(path, opts) {
-    return readJsonFile(path).then(
+    this[chainKey] = this[chainKey].then(
+      () => readJsonFile(path)
+    ).then(
       settings => this._update(entries(settings), opts)
     );
+
+    return this;
   }
 
   /**
@@ -84,14 +97,14 @@ class Settings {
    *
    * @param  {object}          opts
    * @param  {array|undefined} args uses process.argv by default
-   * @return {promise}
+   * @return {this}
    */
   argv(opts) {
-    return new Promise(resolve => {
+    this[chainKey] = this[chainKey].then(() => {
       const argv = opts.argv;
       const parser = parserFactory(opts, this);
 
-      resolve(parser.parseArgs(argv));
+      return parser.parseArgs(argv);
     }).then(settings => {
       opts.transform = (entrie) => ([
         camelCase(entrie[0]),
@@ -100,6 +113,8 @@ class Settings {
 
       return this._update(entries(settings), opts);
     });
+
+    return this;
   }
 
   update(settings, opts) {

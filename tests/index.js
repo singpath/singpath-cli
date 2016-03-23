@@ -78,7 +78,7 @@ describe('Settings', function() {
         'FOO_BAR': 4
       };
 
-      return settings.env(prefix, {env}).then(settings => {
+      return settings.env(prefix, {env}).done().then(settings => {
         expect(settings).to.eql({foo, fooBar});
       });
     });
@@ -92,7 +92,7 @@ describe('Settings', function() {
         [`${prefix}FOO_BAR`]: fooBar
       };
 
-      return settings.env(undefined, {env}).then(settings => {
+      return settings.env(undefined, {env}).done().then(settings => {
         expect(settings).to.eql({foo, fooBar});
       });
     });
@@ -108,7 +108,7 @@ describe('Settings', function() {
         'FOO_BAR': 4
       };
 
-      return settings.env(prefix).then(settings => {
+      return settings.env(prefix).done().then(settings => {
         expect(settings).to.eql({foo, fooBar});
       });
     });
@@ -131,13 +131,13 @@ describe('Settings', function() {
 
     it('should update setting from json file', function() {
 
-      return settings.json(cfgPath).then(settings => {
+      return settings.json(cfgPath).done().then(settings => {
         expect(settings).to.eql({foo, fooBar});
       });
     });
 
     it('should skip json file update if file is missing', function() {
-      return settings.json(notFoundPath).then(settings => {
+      return settings.json(notFoundPath).done().then(settings => {
         expect(settings).to.eql({foo: 1});
       });
     });
@@ -157,7 +157,7 @@ describe('Settings', function() {
       const cmd = () => undefined;
       const addHelp = false;
 
-      return settings.argv({argv, cmd, options, addHelp}).then(settings => {
+      return settings.argv({argv, cmd, options, addHelp}).done().then(settings => {
         expect(settings).to.eql({
           foo,
           fooBar,
@@ -183,7 +183,7 @@ describe('Settings', function() {
         cmd: cmd
       }];
 
-      return settings.argv({argv, subCmds}).then(settings => {
+      return settings.argv({argv, subCmds}).done().then(settings => {
         expect(settings).to.eql({
           foo,
           fooBar,
@@ -198,7 +198,7 @@ describe('Settings', function() {
     it('should reject if neither cmd or subCmds is not set', function() {
       const argv = ['cmd1', '--foo', '2', '--foo-bar', '3'];
 
-      return settings.argv({argv}).then(
+      return settings.argv({argv}).done().then(
         () => Promise.reject(new Error('unexpected')),
         () => undefined
       ).then(
